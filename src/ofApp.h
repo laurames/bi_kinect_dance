@@ -33,6 +33,7 @@ public:
     void mouseExited(int x, int y);
     void windowResized(int w, int h);
     
+    ofImage bg;
     ofxKinect kinect;
     
 #ifdef USE_TWO_KINECTS

@@ -2,6 +2,7 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    bg.load("images/bg.jpg");
     ofSetLogLevel(OF_LOG_VERBOSE);
     
     // enable depth->video image calibration
@@ -33,14 +34,14 @@ void ofApp::setup() {
     grayThreshNear.allocate(kinect.width, kinect.height);
     grayThreshFar.allocate(kinect.width, kinect.height);
     
-    nearThreshold = 230;
-    farThreshold = 70;
+    nearThreshold = 200;
+    farThreshold = 156;
     bThreshWithOpenCV = true;
     
     ofSetFrameRate(60);
     
     // zero the tilt on startup
-    angle = 0;
+    angle = 6;
     kinect.setCameraTiltAngle(angle);
     
     // start from the front
@@ -98,7 +99,9 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    
+    int wScreen = ofGetWidth();
+    int hScreen = ofGetHeight();
+    bg.draw(0, 0, wScreen, hScreen);
     ofSetColor(255, 255, 255);
     
     if(bDrawPointCloud) {
@@ -110,7 +113,7 @@ void ofApp::draw() {
         //kinect.drawDepth(10, 10, 400, 300);
         //kinect.draw(420, 10, 400, 300);
         
-        //grayImage.draw(10, 320, 400, 300);
+        grayImage.draw(10, 320, 400, 300);
         //contourFinder.draw(10, 320, 400, 300);
         
         for (int i = 0; i <contourFinder.nBlobs; i++){
@@ -142,14 +145,12 @@ void ofApp::draw() {
                 glPointSize(3);
                 ofPushMatrix();
                 // the projected points are 'upside down' and 'backwards'
-                ofScale(1, -1, -1);
+                ofScale(-2, 2, -2);
                 ofTranslate(0, 0, -1000); // center the points a bit
                 ofEnableDepthTest();
                 mesh.drawVertices();
                 ofDisableDepthTest();
                 ofPopMatrix();
-                
-                //contourPoly.push_back(smoothTempPoly);
             }
             
         }
