@@ -1,8 +1,12 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOsc.h"
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
+
+
+#define PORT 12345
 
 // This should install the Kinect camera, motor, & audio drivers.
 //
@@ -32,9 +36,28 @@ public:
     void mouseEntered(int x, int y);
     void mouseExited(int x, int y);
     void windowResized(int w, int h);
+    void gotMessage(ofMessage msg);
+    
+    ofxOscReceiver receive;
+    float alpha1 = 0.0;
+    float alpha2 = 0.0;
+    float attention = 0.0;
+    float beta1 = 0.0;
+    float beta2 = 0.0;
+    float blink = 0.0;
+    float contact = 0.0;
+    float delta = 0.0;
+    float gamma1 = 0.0;
+    float gamma2 = 0.0;
+    float meditation = 0.0;
+    float raw = 0.0;
+    float theta = 0.0;
+    float total = 0.0;
     
     ofImage bg;
     ofxKinect kinect;
+    ofMesh mesh;
+    vector<ofVec3f> offsets;
     
 #ifdef USE_TWO_KINECTS
     ofxKinect kinect2;

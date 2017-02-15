@@ -2,6 +2,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    receive.setup(PORT);
+    ofSetFrameRate(60);
     bg.load("images/bg.jpg");
     ofSetLogLevel(OF_LOG_VERBOSE);
     
@@ -50,6 +52,68 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::update() {
+    while(receive.hasWaitingMessages()) {
+        ofxOscMessage m;
+        receive.getNextMessage(m);
+        
+        if(m.getAddress() == "/BrainWave/Raw") {
+            raw = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Raw: " + ofToString(raw));
+        }
+        if (m.getAddress() == "/BrainWave/Theta") {
+            theta = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Theta: " + ofToString(theta));
+        }
+        if (m.getAddress() == "/BrainWave/Alpha1") {
+            alpha1 = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Alpha1: " + ofToString(alpha1));
+        }
+        if (m.getAddress() == "/BrainWave/Alpha2") {
+            alpha2 = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Alpha2: " + ofToString(alpha2));
+        }
+        if (m.getAddress() == "/BrainWave/Attention") {
+            //attention = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Attention: " + ofToString(attention));
+        }
+        if (m.getAddress() == "/BrainWave/Beta1") {
+            beta1 = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Beta1: " + ofToString(beta1));
+        }
+        if (m.getAddress() == "/BrainWave/Beta2") {
+            beta2 = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Beta2: " + ofToString(beta2));
+        }
+        if (m.getAddress() == "/BrainWave/Blink") {
+            //blink = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Blink: " + ofToString(blink));
+        }
+        if (m.getAddress() == "/BrainWave/Contact") {
+            //contact = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Contact: " + ofToString(contact));
+        }
+        if (m.getAddress() == "/BrainWave/Delta") {
+            delta = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Delta: " + ofToString(delta));
+        }
+        if (m.getAddress() == "/BrainWave/Gamma1") {
+            gamma1 = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Gamma1: " + ofToString(gamma1));
+        }
+        if (m.getAddress() == "/BrainWave/Gamma2") {
+            gamma2 = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Gamma2: " + ofToString(gamma2));
+        }
+        if (m.getAddress() == "/BrainWave/Meditation") {
+            //meditation = m.getArgAsFloat(0);
+            //ofLog(OF_LOG_NOTICE, "Meditation: " + ofToString(meditation));
+        }
+        if (m.getAddress() == "/BrainWave/TotalActivity") {
+            total = m.getArgAsFloat(0)/400;
+            //ofLog(OF_LOG_NOTICE, "Total: " + ofToString(total));
+        }
+    }
+
     
     ofBackground(100, 100, 100);
     
@@ -104,6 +168,11 @@ void ofApp::draw() {
     bg.draw(0, 0, wScreen, hScreen);
     ofSetColor(255, 255, 255);
     
+    int step=2, ptSize= 1;
+    float colorM=1;
+
+    
+    
     if(bDrawPointCloud) {
         easyCam.begin();
         drawPointCloud();
@@ -135,14 +204,39 @@ void ofApp::draw() {
                 
                 //smoothTempPoly.draw();
                 ofMesh mesh;
-                vector<ofPoint> tempPoint = smoothTempPoly.getVertices();
-                for(int j=0; j<tempPoint.size(); j++){
-                    ofSetColor(ofRandom(255),ofRandom(255),ofRandom(255));
-                    //ofDrawEllipse(tempPoint[j], 2, 2);
-                    mesh.addColor(kinect.getColorAt(tempPoint[j].x,tempPoint[j].y));
-                    mesh.addVertex(kinect.getWorldCoordinateAt(tempPoint[j].x, tempPoint[j].y));
+                
+                if((beta1+beta2) > (alpha1+alpha2) && (beta1+beta2) > theta){
+                    step = 1;
+                    colorM = 1;
+                    ptSize = 4;
+                    mesh.setMode (OF_PRIMITIVE_TRIANGLES);
+                    ofLog(OF_LOG_NOTICE, "BETA");
                 }
-                glPointSize(3);
+                if((alpha1+alpha2) > (beta1+beta2) && (alpha1+alpha2) > theta){
+                    step = 3;
+                    colorM = 50;
+                    ptSize = 7;
+                    mesh.setMode(OF_PRIMITIVE_POINTS);
+                    ofLog(OF_LOG_NOTICE, "ALPHA");
+                }
+                if(theta > (alpha1+alpha2) && theta > (beta1+beta2)){
+                    step = 6;
+                    colorM = 64;
+                    ptSize = 10;
+                    mesh.setMode(OF_PRIMITIVE_LINE_LOOP);
+                    ofLog(OF_LOG_NOTICE, "THETA");
+                }
+
+                vector<ofPoint> tempPoint = smoothTempPoly.getVertices();
+                for(int j=0; j<tempPoint.size(); j+=step){
+                    ofSetColor(ofRandom(1000*gamma1),ofRandom(1000*delta),ofRandom(255));
+                
+                    //ofDrawEllipse(tempPoint[j], 2, 2);
+                    mesh.addColor(kinect.getColorAt(tempPoint[j].x,tempPoint[j].y)*colorM);
+                    mesh.addVertex(kinect.getWorldCoordinateAt(tempPoint[j].x, tempPoint[j].y));
+                    
+                }
+                glPointSize(ptSize);
                 ofPushMatrix();
                 // the projected points are 'upside down' and 'backwards'
                 ofScale(-2, 2, -2);
@@ -343,3 +437,7 @@ void ofApp::windowResized(int w, int h)
 {
     
 }
+void ofApp::gotMessage(ofMessage msg){
+    
+}
+
